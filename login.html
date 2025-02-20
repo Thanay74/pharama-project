@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGIN PAGE</title>
+    <style>
+        .login-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            border-radius: 30px;
+            background-color: #1F6366;
+        }
+        .login_box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 20px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        .input-grp {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-grp input {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #fff;
+            outline: none;
+            color: #fff;
+            font-size: 16px;
+        }
+        .input-grp label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: white;
+            font-weight: bolder;
+            transition: 0.3s ease-in-out;
+        }
+        .input-grp input:focus + label,
+        .input-grp input:valid + label {
+            top: -10px;
+            font-size: 12px;
+            color: white;
+            font-weight: bolder;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background: black;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #3F6782;
+        }
+        .signup-text a,
+        .forgot-password {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .signup-text a:hover,
+        .forgot-password:hover {
+            color: #6a11cb;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: url("https://static.vecteezy.com/system/resources/thumbnails/042/585/516/small_2x/ai-generated-medical-stethoscope-on-green-background-top-view-with-copy-space-photo.jpg") no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1F6366;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        .popup-content {
+            text-align: center;
+        }
+        .close-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #3F6782;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .close-btn:hover {
+            background-color: #2d4b5f;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <div class="login-container">
+            <h2>LOGIN</h2>
+            <div class="login_box">
+                <form id="loginForm">
+                    <div class="input-grp">
+                        <input type="email" id="email" name="email" required>
+                        <label for="email">Email:</label><br>
+                    </div>
+                    <div class="input-grp">
+                        <input type="password" id="password" name="password" required>
+                        <label for="password">Password:</label>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                    <p class="signup-text">Don't have an account? <a href="register.html">Sign Up</a></p>
+                    <p><a href="forgot-password.html" class="forgot-password">Forgot Password?</a></p>
+                </form>
+            </div>
+        </div>
+    </center>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <p id="popupMessage"></p>
+            <button id="closePopup" class="close-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            
+            // Basic client-side validations
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showPopup('Please enter a valid email address.');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showPopup('Password must be at least 8 characters long.');
+                return;
+            }
+            
+            // If client-side validations pass, send the login data to the server
+            fetch('login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'email': email,
+                    'password': password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showPopup(data.message);
+                    // Check if the user is an admin and redirect accordingly
+                    if (data.redirect === 'admin_panel.html') {
+                        setTimeout(() => {
+                            window.location.href = 'admin-panel.html';
+                        }, 2000);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    }
+                } else {
+                    showPopup(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showPopup('An error occurred. Please try again.');
+            });
+        });
+
+        document.getElementById('forgotPassword').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPopup('Password reset functionality not implemented yet.');
+            // Here you would typically implement the forgot password functionality
+        });
+
+        function showPopup(message) {
+            const popup = document.getElementById('popup');
+            const popupMessage = document.getElementById('popupMessage');
+            popupMessage.textContent = message;
+            popup.style.display = 'block';
+        }
+
+        function hidePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+
+        document.getElementById('closePopup').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            hidePopup();
+        });
+
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('popup');
+            const closeBtn = document.getElementById('closePopup');
+            
+            if (e.target === popup || e.target === closeBtn) {
+                hidePopup();
+            }
+        });
+    </script>
+</body>
+</html>
+
